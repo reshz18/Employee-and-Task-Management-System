@@ -1,0 +1,315 @@
+{% extends 'employee_base.html' %}
+
+{% block title %}Submit Daily Update{% endblock %}
+
+{% block content %}
+<style>
+/* Main container styling */
+.update-container {
+    max-width: 700px;
+    width: 100%;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    border-radius: 15px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 2.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.update-container:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+/* Form header styling */
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h1 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 2.2rem;
+}
+
+.form-subtitle {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Progress bar styling */
+.progress-bar-container {
+    height: 6px;
+    background-color: #ecf0f1;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+/* Form group styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #34495e;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.required-field::after {
+    content: " *";
+    color: #e74c3c;
+}
+
+/* Input styling */
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Icon input styling */
+.icon-input {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7f8c8d;
+    z-index: 1;
+}
+
+textarea + .input-icon {
+    top: 20px;
+    transform: none;
+}
+
+/* Date and time input styling */
+.date-input, .time-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+/* Button styling */
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.optional-note {
+    color: #e74c3c;
+    font-size: 0.9rem;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(41, 128, 185, 0.3);
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #2980b9, #3498db);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 10px rgba(41, 128, 185, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 3px rgba(41, 128, 185, 0.4);
+}
+
+/* Animation for inputs */
+@keyframes focusAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.form-control:focus {
+    animation: focusAnimation 0.3s ease;
+}
+</style>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="update-container">
+        <div class="form-header">
+            <h1>Submit Daily Update</h1>
+            <p class="form-subtitle">Keep your team informed about your progress</p>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="formProgress"></div>
+            </div>
+        </div>
+
+        <form method="post" id="dailyUpdateForm" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_date" class="required-field">Date</label>
+                <div class="date-input">
+                    <input type="date" name="date" id="id_date" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_daily_hours" class="required-field">Daily Hours</label>
+                <div class="time-inputs">
+                    <div class="time-input icon-input">
+                        <i class="fas fa-clock input-icon"></i>
+                        <input type="number" name="daily_hours" id="id_daily_hours" class="form-control"
+                               placeholder="Hours" min="0" max="24" step="0.5" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_tasks_completed" class="required-field">Tasks Completed Today</label>
+                <div class="icon-input">
+                    <i class="fas fa-check-circle input-icon"></i>
+                    <textarea name="tasks_completed" id="id_tasks_completed" class="form-control"
+                              placeholder="List the tasks you've completed today..." required></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_challenges" class="required-field">Challenges Encountered</label>
+                <div class="icon-input">
+                    <i class="fas fa-exclamation-triangle input-icon"></i>
+                    <textarea name="challenges" id="id_challenges" class="form-control"
+                              placeholder="Describe any challenges or blockers..." required></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_planned_tasks">Tasks Planned for Tomorrow</label>
+                <div class="icon-input">
+                    <i class="fas fa-calendar-alt input-icon"></i>
+                    <textarea name="planned_tasks" id="id_planned_tasks" class="form-control"
+                              placeholder="What do you plan to work on next?"></textarea>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <span class="optional-note">* Required fields</span>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Submit Update
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('id_date').value = today;
+        
+        // Get all required inputs
+        const requiredInputs = document.querySelectorAll('input[required], textarea[required]');
+        const formProgressBar = document.getElementById('formProgress');
+        
+        // Function to update progress bar
+        function updateProgressBar() {
+            let completedFields = 0;
+            
+            requiredInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    completedFields++;
+                }
+            });
+            
+            const progressPercentage = (completedFields / requiredInputs.length) * 100;
+            formProgressBar.style.width = `${progressPercentage}%`;
+            
+            // Change color based on progress
+            if (progressPercentage < 33) {
+                formProgressBar.style.background = 'linear-gradient(90deg, #e74c3c, #f39c12)';
+            } else if (progressPercentage < 66) {
+                formProgressBar.style.background = 'linear-gradient(90deg, #f39c12, #3498db)';
+            } else {
+                formProgressBar.style.background = 'linear-gradient(90deg, #3498db, #2ecc71)';
+            }
+        }
+        
+        // Add input event listeners to all required fields
+        requiredInputs.forEach(input => {
+            input.addEventListener('input', updateProgressBar);
+        });
+        
+        // Initialize progress bar
+        updateProgressBar();
+        
+        // Add subtle animation to icons on input focus
+        const allInputs = document.querySelectorAll('.form-control');
+        
+        allInputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                const iconParent = this.closest('.icon-input');
+                if (iconParent) {
+                    const icon = iconParent.querySelector('.input-icon');
+                    if (icon) {
+                        icon.style.color = '#3498db';
+                        icon.style.transform = 'translateY(-50%) scale(1.2)';
+                        icon.style.transition = 'all 0.3s ease';
+                    }
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                const iconParent = this.closest('.icon-input');
+                if (iconParent) {
+                    const icon = iconParent.querySelector('.input-icon');
+                    if (icon) {
+                        icon.style.color = '#7f8c8d';
+                        icon.style.transform = 'translateY(-50%) scale(1)';
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

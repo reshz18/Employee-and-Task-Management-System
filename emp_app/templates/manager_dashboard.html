@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+<!-- Main Content Body -->
+<br>
+<!-- Dashboard Cards -->
+<div class="dashboard-cards">
+  <div class="card">
+    <div class="icon"><i class="fas fa-users"></i></div>
+    <h3>Total Employees</h3>
+    <p>{{ total_employees }}</p>
+  </div>
+  <div class="card">
+    <div class="icon"><i class="fas fa-calendar-check"></i></div>
+    <h3>On Leave Today</h3>
+    <p>{{ on_leave_today }}</p>
+  </div>
+  <div class="card">
+    <div class="icon"><i class="fas fa-clock"></i></div>
+    <h3>Pending Leave Requests</h3>
+    <p>{{ pending_leave_requests }}</p>
+  </div>
+</div>
+
+<!-- Announcements Section -->
+<div class="announcements">
+  <h2>Announcements</h2>
+  <ul>
+    {% for announcement in announcements %}
+    <li>
+      {{ announcement.message }}
+      <small>Posted by {{ announcement.created_by.first_name }} on {{ announcement.created_at }}</small>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Quick Actions Section -->
+<div class="quick-actions">
+  <h2>Quick Actions</h2>
+  <div class="actions">
+    <a href="{% url 'add_emp' %}"><button><i class="fas fa-plus"></i> Add Employee</button></a>
+    <!-- Add Edit Employee Button -->
+    <a href="{% url 'edit_employee_list' %}"><button><i class="fas fa-edit"></i> Edit Employee</button></a>
+    <a href="{% url 'send_announcement' %}"><button><i class="fas fa-envelope"></i> Send Announcement</button></a>
+    <a href="{% url 'create_meet' %}"><button><i class="fas fa-calendar-alt"></i> Schedule Meeting</button></a>
+    {% comment %} <a href="{% url 'assign_salary' %}"><button><i class="fas fa-money-bill"></i> Assign Salary</button></a> <!-- Added Salary Button --> {% endcomment %}
+  </div>
+</div>
+
+<style>
+  /* Original CSS for Dashboard */
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  .card h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #007bff;
+  }
+
+  .card p {
+    font-size: 16px;
+    color: #666;
+  }
+
+  .card .icon {
+    font-size: 24px;
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+
+  .announcements {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  .announcements h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+
+  .announcements ul {
+    list-style-type: none;
+  }
+
+  .announcements ul li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .announcements ul li:last-child {
+    border-bottom: none;
+  }
+
+  .announcements ul li small {
+    display: block;
+    color: #777;
+    font-size: 14px;
+  }
+
+  .quick-actions {
+    margin-top: 20px;
+  }
+
+  .quick-actions h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+
+  .quick-actions .actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .quick-actions .actions button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+
+  .quick-actions .actions button:hover {
+    background-color: #0056b3;
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Remove Employee{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">Select Employee to Remove</h1>
+
+  {% if employees %}
+    <ul class="list-disc pl-5">
+      {% for emp in employees %}
+        <li class="mb-2">
+          <a href="{% url 'remove_emp' emp.id %}" class="text-red-600 hover:underline">
+            {{ emp.first_name }} {{ emp.last_name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-500">No employees found.</p>
+  {% endif %}
+</div>
+{% endblock %}

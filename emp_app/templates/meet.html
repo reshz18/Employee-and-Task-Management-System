@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Room</title>
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #meet {
+            width: 100%;
+            height: 600px;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Meeting Room: {{ meeting_id }}</h2>
+    <div id="meet"></div>
+
+    <!-- Control Buttons -->
+    <div class="controls">
+        <button id="micButton">Mute/Unmute Mic</button>
+        <button id="videoButton">Turn Camera On/Off</button>
+        <button id="screenButton">Share Screen</button>
+        <button id="chatButton">Open Chat</button>
+        <button id="leaveButton">Leave Meeting</button> <!-- Leave Button -->
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const domain = "meet.jit.si";
+            const options = {
+                roomName: "{{ meeting_id }}",
+                width: "100%",
+                height: 600,
+                parentNode: document.querySelector("#meet"),
+                userInfo: {
+                    displayName: "{{ user.username }}"  // Use the logged-in user's username
+                },
+                configOverwrite: {
+                    startWithVideoMuted: true,  // Auto mute on join
+                    startWithAudioMuted: true,  // Auto mute on join
+                    enableWelcomePage: false,
+                    prejoinPageEnabled: false  // Removes "Waiting for an authenticated user" issue
+                },
+                interfaceConfigOverwrite: {
+                    SHOW_JITSI_WATERMARK: false,
+                    DISABLE_VIDEO_BACKGROUND: true,
+                }
+            };
+
+            const api = new JitsiMeetExternalAPI(domain, options);
+
+            // Mic Toggle
+            document.getElementById("micButton").addEventListener("click", function() {
+                api.executeCommand("toggleAudio");
+            });
+
+            // Video Toggle
+            document.getElementById("videoButton").addEventListener("click", function() {
+                api.executeCommand("toggleVideo");
+            });
+
+            // Screen Sharing
+            document.getElementById("screenButton").addEventListener("click", function() {
+                api.executeCommand("toggleShareScreen");
+            });
+
+            // Chat Toggle
+            document.getElementById("chatButton").addEventListener("click", function() {
+                api.executeCommand("toggleChat");
+            });
+
+            // Leave Meeting
+            document.getElementById("leaveButton").addEventListener("click", function() {
+                api.dispose();  // Disconnect Jitsi before leaving
+
+                // Redirect based on user role
+                {% if user.is_staff %}
+                    window.location.href = "{% url 'manager_dashboard' %}";
+                {% else %}
+                    window.location.href = "{% url 'employee_dashboard' %}";
+                {% endif %}
+            });
+        });
+    </script>
+
+</body>
+</html>

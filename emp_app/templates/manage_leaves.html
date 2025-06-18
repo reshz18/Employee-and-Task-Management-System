@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Leaves{% endblock %}
+
+{% block content %}
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+
+<!-- Remixicon -->
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+
+<!-- Custom Styles -->
+<style>
+  .rounded-button { border-radius: 8px; }
+  .leave-item {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .leave-item h3 { font-size: 18px; font-weight: 600; color: #333; }
+  .leave-item p { font-size: 14px; color: #666; }
+  .disabled-button { opacity: 0.5; cursor: not-allowed; }
+
+  /* 🔔 Notification Popup */
+  #notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .show-notification {
+    display: flex !important;
+    opacity: 1;
+  }
+</style>
+
+<!-- 🔔 Notification Popup -->
+<div id="notification" class="hidden">
+  <i id="notification-icon" class="text-xl"></i>
+  <span id="notification-message" class="text-gray-700"></span>
+</div>
+
+<div class="bg-gray-50 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-semibold text-gray-900">Manage Leaves</h1>
+
+    <div id="requestsContainer" class="grid grid-cols-1 gap-6 mb-8">
+      {% for leave in leaves %}
+      <div id="leave-{{ leave.id }}" class="leave-item p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-4">
+            <img class="w-12 h-12 rounded-full" src="{{ leave.employee.profile_photo.url }}" alt="Employee" />
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">
+                {{ leave.employee.first_name }} {{ leave.employee.last_name }}
+              </h3>
+              <p class="text-sm text-gray-500">{{ leave.employee.dept.name }}</p>
+            </div>
+          </div>
+          <span id="status-{{ leave.id }}" class="px-3 py-1 text-sm font-medium rounded-full
+              {% if leave.status == 'Approved' %} bg-green-100 text-green-800
+              {% elif leave.status == 'Rejected' %} bg-red-100 text-red-800
+              {% else %} bg-yellow-100 text-yellow-800{% endif %}">
+            {{ leave.status }}
+          </span>
+        </div>
+
+        <div class="mb-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">Leave Details</h4>
+          <p class="text-gray-600">
+            <strong>Reason:</strong> {{ leave.leave_reason }}<br />
+            <strong>Place of Visit:</strong> {{ leave.place_of_visit }}<br />
+            <strong>Remarks:</strong> {{ leave.remarks|default:"No remarks" }}
+          </p>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <div class="flex space-x-4">
+            <span class="text-sm text-gray-500">From: {{ leave.from_date }}</span>
+            <span class="text-sm text-gray-500">To: {{ leave.to_date }}</span>
+          </div>
+
+          {% if leave.status == 'Pending' %}
+          <div class="flex space-x-3">
+            <button id="approve-btn-{{ leave.id }}" class="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-button hover:bg-green-600"
+              onclick="handleLeaveRequest({{ leave.id }}, 'approve')">
+              Approve
+            </button>
+            <button id="reject-btn-{{ leave.id }}" class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-button hover:bg-red-600"
+              onclick="handleLeaveRequest({{ leave.id }}, 'reject')">
+              Reject
+            </button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center text-gray-500">No pending leave requests.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for AJAX Requests -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    console.log("DOM fully loaded and parsed");
+
+    function handleLeaveRequest(leaveId, action) {
+      console.log("handleLeaveRequest called with leaveId:", leaveId, "and action:", action);
+
+      let url = action === "approve" 
+        ? "{% url 'approve_leave' 0 %}".replace("0", leaveId)
+        : "{% url 'reject_leave' 0 %}".replace("0", leaveId);
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/json",
+        },
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to process request");
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.status) {
+          showNotification(`Leave request ${data.status.toLowerCase()} successfully`, data.status === "Approved");
+          
+          // Update status text & styling
+          document.getElementById(`status-${leaveId}`).textContent = data.status;
+          document.getElementById(`status-${leaveId}`).className =
+            "px-3 py-1 text-sm font-medium rounded-full " +
+            (data.status === "Approved" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800");
+
+          // Remove the leave request after approval/rejection
+          setTimeout(() => {
+            document.getElementById(`leave-${leaveId}`).remove();
+          }, 1500);
+        }
+      })
+      .catch(error => console.error("Error:", error));
+    }
+
+    function getCSRFToken() {
+      let cookieValue = null;
+      let cookies = document.cookie.split("; ");
+      for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].split("=");
+        if (cookie[0] === "csrftoken") {
+          cookieValue = cookie[1];
+          break;
+        }
+      }
+      return cookieValue;
+    }
+
+    function showNotification(message, isSuccess) {
+      const notification = document.getElementById("notification");
+      const messageElement = document.getElementById("notification-message");
+      const iconElement = document.getElementById("notification-icon");
+
+      iconElement.className = isSuccess 
+        ? "ri-checkbox-circle-line text-green-500 text-xl"
+        : "ri-close-circle-line text-red-500 text-xl";
+
+      messageElement.textContent = message;
+      notification.classList.add("show-notification");
+
+      setTimeout(() => {
+        notification.classList.remove("show-notification");
+      }, 3000);
+    }
+
+    // Expose the function globally
+    window.handleLeaveRequest = handleLeaveRequest;
+  });
+</script>
+
+{% endblock %}

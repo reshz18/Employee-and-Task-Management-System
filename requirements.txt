@@ -1,0 +1,16 @@
+# pip install openpyxl
+# pip install channels
+# pip install django-cors-headers
+# pip install daphne
+# py manage.py runserver --noreload
+# pip install pyjwt
+# pip install django-rest-framework
+
+
+openpyxl
+channels
+django-cors-headers
+daphne
+pyjwt
+reportlab
+

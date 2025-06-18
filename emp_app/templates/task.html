@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Task{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #4F46E5;
+        --primary-hover: #4338CA;
+        --secondary-color: #8B5CF6;
+        --background-color: #F9FAFB;
+        --text-color: #111827;
+        --text-secondary: #4B5563;
+        --border-color: #E5E7EB;
+        --success-color: #10B981;
+        --error-color: #EF4444;
+        --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --input-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', 'Poppins', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        line-height: 1.6;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 650px;
+        margin: 2.5rem auto;
+        padding: 1rem;
+    }
+
+    .task-form-wrapper {
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        padding: 2.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+
+    .task-form-wrapper:hover {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    h1 {
+        color: var(--text-color);
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        font-size: 1.75rem;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .form-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-color);
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #F9FAFB;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: var(--input-shadow);
+        background-color: white;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 0.9rem;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:active {
+        transform: translateY(1px);
+    }
+
+    /* Date Input Styling */
+    input[type="date"] {
+        cursor: pointer;
+    }
+
+    /* Notification Styles */
+    #notification {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        z-index: 1000;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        transform: translateX(120%);
+        opacity: 0;
+        max-width: 350px;
+    }
+
+    #notification.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    #notification.success {
+        border-left: 4px solid var(--success-color);
+    }
+
+    #notification.error {
+        border-left: 4px solid var(--error-color);
+    }
+
+    #notification-message {
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    /* Form Section Styling */
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child {
+        margin-bottom: 1.5rem;
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-icon {
+        color: var(--primary-color);
+    }
+
+    /* Two Column Layout */
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .form-col {
+        flex: 1;
+    }
+
+    /* Custom Select Styling */
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M1 4l5 5 5-5' fill='none' stroke='%236b7280' stroke-width='2'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 10px 10px;
+        padding-right: 2.5rem;
+        cursor: pointer;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .task-form-wrapper {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+            margin: 1.5rem auto;
+        }
+
+        .task-form-wrapper {
+            padding: 1.75rem;
+            border-radius: 12px;
+        }
+        
+        .form-row {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="task-form-wrapper">
+        <div class="form-header">
+            <h1>Create a New Task</h1>
+            <p class="form-subtitle">Fill in the details to create a new task in the system</p>
+        </div>
+        
+        <form id="taskForm" method="POST">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="ri-information-line section-icon"></i>
+                    Basic Information
+                </h2>
+                <div class="form-group">
+                    <label>Task Name:</label>
+                    <input type="text" name="task_name" class="form-control" required placeholder="Enter task name">
+                </div>
+
+                <div class="form-group">
+                    <label>Task Description:</label>
+                    <textarea name="task_description" class="form-control" rows="4" required placeholder="Describe the task details"></textarea>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="ri-calendar-line section-icon"></i>
+                    Schedule
+                </h2>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Start Date:</label>
+                            <input type="date" name="task_start_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>End Date:</label>
+                            <input type="date" name="task_end_date" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="ri-settings-line section-icon"></i>
+                    Task Details
+                </h2>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Priority:</label>
+                            <select name="task_priority" class="form-control" required>
+                                <option value="" disabled selected>Select priority</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Assign To:</label>
+                            <select name="assigned_to" class="form-control" required>
+                                <option value="" disabled selected>Select employee</option>
+                                {% for emp in emps %}
+                                    <option value="{{ emp.id }}">{{ emp.first_name }} {{ emp.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="ri-add-line"></i> Create Task
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Notification Popup -->
+<div id="notification">
+    <i id="notification-icon"></i>
+    <span id="notification-message"></span>
+</div>
+
+<script>
+    document.getElementById("taskForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const notification = document.getElementById("notification");
+        const icon = document.getElementById("notification-icon");
+        const messageElement = document.getElementById("notification-message");
+
+        fetch("{% url 'task' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                notification.classList.add("show", "success");
+                icon.className = "ri-checkbox-circle-line text-green-500";
+                messageElement.textContent = data.message;
+                this.reset();
+                
+                // Set default selected option after reset
+                document.querySelectorAll('select').forEach(select => {
+                    const firstOption = select.querySelector('option');
+                    if (firstOption) firstOption.selected = true;
+                });
+            } else {
+                notification.classList.add("show", "error");
+                icon.className = "ri-close-circle-line text-red-500";
+                messageElement.textContent = data.message;
+            }
+
+            setTimeout(() => {
+                notification.classList.remove("show");
+                setTimeout(() => {
+                    notification.classList.remove("success", "error");
+                }, 300);
+            }, 3000);
+        })
+        .catch((error) => {
+            notification.classList.add("show", "error");
+            icon.className = "ri-close-circle-line text-red-500";
+            messageElement.textContent = "An error occurred. Please try again.";
+
+            setTimeout(() => {
+                notification.classList.remove("show");
+                setTimeout(() => {
+                    notification.classList.remove("error");
+                }, 300);
+            }, 3000);
+        });
+    });
+    
+    // Set min date for date inputs to today
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="task_start_date"]').min = today;
+    document.querySelector('input[name="task_end_date"]').min = today;
+    
+    // Ensure end date is not before start date
+    const startDateInput = document.querySelector('input[name="task_start_date"]');
+    const endDateInput = document.querySelector('input[name="task_end_date"]');
+    
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+    });
+</script>
+
+<!-- Include Remix Icon for icons -->
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+
+{% endblock %}

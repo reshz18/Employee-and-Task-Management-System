@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .salary-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: linear-gradient(to bottom right, #ffffff, #f7f9fc);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .salary-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        font-size: 1.8rem;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.75rem;
+    }
+    
+    .salary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .salary-table th {
+        background-color: #3498db;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .salary-table td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .salary-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .salary-table tr:nth-child(even) {
+        background-color: #f9fafb;
+    }
+    
+    .salary-table tr:hover {
+        background-color: #f0f7fc;
+    }
+    
+    /* Specific styling for salary columns */
+    .salary-table td:nth-child(2),
+    .salary-table td:nth-child(3),
+    .salary-table td:nth-child(4) {
+        text-align: right;
+        font-family: 'Courier New', monospace;
+        font-weight: 500;
+    }
+    
+    .salary-table td:nth-child(4) {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+    
+    .action-link {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .action-link:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .empty-message {
+        text-align: center;
+        padding: 2rem;
+        color: #7f8c8d;
+        font-style: italic;
+    }
+</style>
+
+<div class="salary-container">
+    <h2 class="salary-title">Salary List</h2>
+    
+    {% if salaries %}
+    <table class="salary-table">
+        <tr>
+            <th>Employee</th>
+            <th>Basic Salary</th>
+            <th>PF</th>
+            <th>On-Hand Salary</th>
+            <th>Action</th>
+        </tr>
+        {% for salary in salaries %}
+        <tr>
+            <td>{{ salary.employee.first_name }}</td>
+            <td>{{ salary.basic_salary }}</td>
+            <td>{{ salary.pf }}</td>
+            <td>{{ salary.on_hand_salary }}</td>
+            <td><a href="{% url 'add_salary' salary.employee.id %}" class="action-link">Update Salary</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <div class="empty-message">No salary records found.</div>
+    {% endif %}
+</div>
+{% endblock %}

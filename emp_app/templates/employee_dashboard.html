@@ -1,0 +1,378 @@
+{% extends 'employee_base.html' %}
+
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+  <h2 class="dashboard-title">Welcome back, {{ request.user.first_name }} {{ request.user.last_name }}</h2>
+</div>
+
+<!-- Dashboard Stats Overview -->
+<div class="stats-overview">
+  <div class="stat-card primary-card">
+    <div class="stat-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-number">{{ tasks_completed }}</div>
+      <p>Completed</p>
+    </div>
+  </div>
+  
+  <div class="stat-card warning-card">
+    <div class="stat-icon">
+      <i class="fas fa-clock"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-number">{{ tasks_in_progress }}</div>
+      <p>In Progress</p>
+    </div>
+  </div>
+  
+  <div class="stat-card danger-card">
+    <div class="stat-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-number">{{ tasks_not_started }}</div>
+      <p>Pending</p>
+    </div>
+  </div>
+  
+  <div class="stat-card success-card">
+    <div class="stat-icon">
+      <i class="fas fa-trophy"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-number">{{ tasks.count }}</div>
+      <p>Total Tasks</p>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard Main Content -->
+<div class="dashboard-main">
+  <!-- Left Column - Chart -->
+  <div class="dashboard-column">
+    <div class="dashboard-panel progress-panel" onclick="window.location.href='{% url 'employee_progress' %}';">
+      <div class="panel-header">
+        <h3><i class="fas fa-chart-line"></i> Progress Trend</h3>
+      </div>
+      <div class="panel-body">
+        <canvas id="monthlyProgressChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Right Column - Announcements -->
+  <div class="dashboard-column">
+    <div class="dashboard-panel announcements-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-bullhorn"></i> Announcements</h3>
+      </div>
+      <div class="panel-body">
+        {% if announcements %}
+          {% for announcement in announcements %}
+          <div class="announcement-item">
+            <div class="announcement-header">
+              <span class="announcement-date">{{ announcement.created_at|date:"M d" }}</span>
+              <span class="announcement-author">{{ announcement.created_by.first_name }}</span>
+            </div>
+            <div class="announcement-content">
+              {{ announcement.message }}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="no-data">
+            <img src="/static/images/no-announcements.svg" alt="No announcements">
+            <p>No new announcements!</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="dashboard-panel calendar-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-calendar-alt"></i> Upcoming Deadlines</h3>
+      </div>
+      <div class="panel-body">
+        <div class="calendar-widget">
+          <div id="mini-calendar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Line Chart for Monthly Progress
+    const monthlyCtx = document.getElementById('monthlyProgressChart').getContext('2d');
+    const monthlyProgressChart = new Chart(monthlyCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Completed Tasks',
+          data: [12, 15, 18, 14, 20, 22],
+          borderColor: '#28a745',
+          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: true,
+              drawBorder: false
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+    
+    // Initialize Mini Calendar
+    const calendarEl = document.getElementById('mini-calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next',
+        center: 'title',
+        right: ''
+      },
+      height: 300,
+      events: [
+        // Example events - these would come from your backend
+        {
+          title: 'Project Due',
+          start: '2025-03-15',
+          color: '#dc3545'
+        },
+        {
+          title: 'Team Meeting',
+          start: '2025-03-05',
+          color: '#007bff'
+        }
+      ]
+    });
+    calendar.render();
+  });
+</script>
+
+<style>
+  /* Dashboard Layout */
+  .dashboard-header {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stat-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+    position: relative;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .primary-card { background: linear-gradient(135deg, #007bff, #0056b3); }
+  .success-card { background: linear-gradient(135deg, #28a745, #1e7e34); }
+  .warning-card { background: linear-gradient(135deg, #ffc107, #d39e00); }
+  .danger-card { background: linear-gradient(135deg, #dc3545, #bd2130); }
+  
+  .stat-icon {
+    font-size: 2rem;
+    opacity: 0.8;
+    margin-right: 1rem;
+  }
+  
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-content p {
+    margin: 0;
+    opacity: 0.8;
+    font-size: 1rem;
+  }
+  
+  .dashboard-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .dashboard-panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  
+  .progress-panel {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .progress-panel:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+  
+  .panel-header {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .panel-header h3 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  
+  .panel-header h3 i {
+    margin-right: 0.5rem;
+    opacity: 0.7;
+  }
+  
+  .panel-body {
+    padding: 1.5rem;
+  }
+  
+  /* Progress Panel */
+  .progress-panel .panel-body {
+    height: 300px; /* Fixed height for the progress trend chart */
+  }
+  
+  /* Announcements Panel */
+  .announcement-item {
+    padding: 1rem;
+    border-left: 3px solid #007bff;
+    background: #f8f9fa;
+    margin-bottom: 1rem;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .announcement-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .announcement-date {
+    color: #6c757d;
+  }
+  
+  .announcement-author {
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  .announcement-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  /* No Data State */
+  .no-data {
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .no-data img {
+    max-width: 120px;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+  }
+  
+  .no-data p {
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+  
+  /* Calendar */
+  .calendar-widget {
+    height: 300px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 992px) {
+    .dashboard-main {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .stats-overview {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .dashboard-header {
+      padding: 1.5rem;
+    }
+    
+    .dashboard-title {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+{% endblock %}

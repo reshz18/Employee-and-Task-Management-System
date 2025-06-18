@@ -1,0 +1,127 @@
+{% extends 'employee_base.html' %}
+{% block content %}
+<style>
+    .details-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: linear-gradient(to bottom right, #ffffff, #f7f9fc);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .details-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        font-size: 1.8rem;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.75rem;
+    }
+    
+    .details-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .details-table th {
+        background-color: #3498db;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        width: 40%;
+    }
+    
+    .details-table td {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        font-family: 'Courier New', monospace;
+        font-weight: 500;
+        text-align: right;
+    }
+    
+    .details-table tr {
+        border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .details-table tr:last-child {
+        border-bottom: none;
+    }
+    
+    .details-table tr:last-child th,
+    .details-table tr:last-child td {
+        background-color: #eaf2f8;
+        font-weight: 700;
+    }
+    
+    .details-table tr:last-child td {
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+    
+    .download-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: #27ae60;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .download-button:hover {
+        background-color: #219653;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .download-button:active {
+        transform: translateY(0);
+    }
+    
+    .not-found {
+        text-align: center;
+        padding: 2rem;
+        color: #7f8c8d;
+        font-style: italic;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="details-container">
+    <h2 class="details-title">Salary Details</h2>
+    
+    {% if salary %}
+    <table class="details-table">
+        <tr>
+            <th>Basic Salary</th>
+            <td>{{ salary.basic_salary }}</td>
+        </tr>
+        <tr>
+            <th>PF</th>
+            <td>{{ salary.pf }}</td>
+        </tr>
+        <tr>
+            <th>On-Hand Salary</th>
+            <td>{{ salary.on_hand_salary }}</td>
+        </tr>
+    </table>
+    
+    <a href="{% url 'download_salary_report' %}" class="download-button">
+        Download Salary Report
+    </a>
+    {% else %}
+    <div class="not-found">
+        No salary record found.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

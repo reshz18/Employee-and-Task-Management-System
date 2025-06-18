@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Directory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+        <div class="h-16 flex items-center justify-between px-6">
+            <div class="flex items-center">
+                <a href="{% url 'manager_dashboard' %}" class="flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg px-4 py-2 transition-colors duration-200 shadow-sm mr-4">
+                    <i class="ri-dashboard-line mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+            <div class="flex-1 max-w-2xl mx-8">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search employees..." class="w-full h-10 pl-10 pr-4 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary" onkeyup="filterEmployees()"/>
+                    <div class="absolute left-3 top-0 h-10 w-5 flex items-center justify-center text-gray-400">
+                        <i class="ri-search-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="flex pt-[94px]">
+        <main class="flex-1 p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="employeeGrid">
+                {% for emp in emps %}
+                <div class="bg-white rounded shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer" onclick="showEmployeeDetails({{ emp.id }}, '{{ emp.first_name }}', '{{ emp.last_name }}', '{{ emp.role.name }}', '{{ emp.dept.name }}', '{{ emp.profile_photo.url }}', '{{ emp.salary }}', '{{ emp.bonus }}', '{{ emp.age }}', '{{ emp.date_of_birth }}', '{{ emp.email }}', '{{ emp.marital_status }}', '{{ emp.gender }}', '{{ emp.hire_date }}')">
+                    <div class="flex flex-col items-center text-center h-full">
+                        <img src="{{ emp.profile_photo.url }}" class="w-20 h-20 rounded-full object-cover mb-4" alt="{{ emp.first_name }}">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ emp.first_name }} {{ emp.last_name }}</h3>
+                        <p class="text-sm text-gray-500 mb-2">{{ emp.role.name }}</p>
+                        <p class="text-sm text-gray-500">{{ emp.dept.name }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+    
+    <!-- Employee Details Modal -->
+    <div id="employeeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-11/12 md:w-1/2 lg:w-1/3">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold" id="modalEmployeeName"></h2>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <img id="modalEmployeeImage" class="w-20 h-20 rounded-full object-cover mb-4 mx-auto" src="" alt="">
+            <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                    <p id="modalEmployeeSalary"></p>
+                    <p id="modalEmployeeHireDate"></p>
+                    <p id="modalEmployeeGender"></p>
+                    <p id="modalEmployeeAge"></p>
+                </div>
+                <div>
+                    <p id="modalEmployeeBonus"></p>
+                    <p id="modalEmployeeDOB"></p>
+                    <p id="modalEmployeeMaritalStatus"></p>
+                    <p id="modalEmployeeEmail"></p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button class="px-4 py-2 text-sm text-white bg-purple-600 rounded-lg hover:bg-purple-700" onclick="downloadEmployeeDetails()">
+                    <i class="ri-download-line mr-2"></i>
+                    Download Details
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showEmployeeDetails(id, firstName, lastName, role, department, image, salary, bonus, age, dob, email, maritalStatus, gender, hireDate) {
+            document.getElementById("modalEmployeeName").textContent = firstName + ' ' + lastName;
+            document.getElementById("modalEmployeeSalary").textContent = "Salary: $" + salary;
+            document.getElementById("modalEmployeeHireDate").textContent = "Hire Date: " + hireDate;
+            document.getElementById("modalEmployeeGender").textContent = "Gender: " + gender;
+            document.getElementById("modalEmployeeAge").textContent = "Age: " + age;
+            document.getElementById("modalEmployeeBonus").textContent = "Bonus: $" + bonus;
+            document.getElementById("modalEmployeeDOB").textContent = "DOB: " + dob;
+            document.getElementById("modalEmployeeMaritalStatus").textContent = "Marital Status: " + maritalStatus;
+            document.getElementById("modalEmployeeEmail").textContent = "Email: " + email;
+            document.getElementById("modalEmployeeImage").src = image;
+            document.getElementById("employeeModal").classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("employeeModal").classList.add("hidden");
+        }
+
+        function downloadEmployeeDetails() {
+            let name = document.getElementById("modalEmployeeName").textContent;
+            let details = Employee Details:\nName: ${name}\nSalary: ${document.getElementById("modalEmployeeSalary").textContent}\nHire Date: ${document.getElementById("modalEmployeeHireDate").textContent}\nGender: ${document.getElementById("modalEmployeeGender").textContent}\nAge: ${document.getElementById("modalEmployeeAge").textContent}\nBonus: ${document.getElementById("modalEmployeeBonus").textContent}\nDOB: ${document.getElementById("modalEmployeeDOB").textContent}\nMarital Status: ${document.getElementById("modalEmployeeMaritalStatus").textContent}\nEmail: ${document.getElementById("modalEmployeeEmail").textContent};
+            let blob = new Blob([details], { type: "text/plain" });
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = ${name}_details.txt;
+            a.click();
+        }
+
+        function filterEmployees() {
+            // Implementation for the employee search filter
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Employee Section{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #3a86ff;
+      --primary-light: #e0ebff;
+      --secondary-color: #6c757d;
+      --sidebar-bg: #1f2937;
+      --sidebar-active: #3a86ff;
+      --sidebar-hover: #374151;
+      --text-light: #f8f9fa;
+      --text-dark: #212529;
+      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      display: flex;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text-dark);
+    }
+
+    /* Sidebar Styling */
+    .sidebar {
+      width: 280px;
+      background-color: var(--sidebar-bg);
+      color: var(--text-light);
+      padding: 1.5rem 0;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar .profile-img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border: 3px solid var(--primary-color);
+      padding: 2px;
+      background-color: white;
+    }
+
+    .sidebar .user-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar .user-role {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .sidebar .nav {
+      margin-top: 1.5rem;
+    }
+
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+      border-left: 3px solid transparent;
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar .nav-link i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: var(--sidebar-hover);
+      color: white;
+    }
+
+    .sidebar .nav-link.active {
+      background-color: rgba(58, 134, 255, 0.15);
+      color: var(--primary-color);
+      border-left: 3px solid var(--primary-color);
+    }
+
+    /* Main Content Styling */
+    .main-content {
+      flex: 1;
+      padding: 1.5rem 2rem;
+      margin-left: 280px;
+    }
+
+    /* Navbar Styling */
+    .top-navbar {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--text-dark);
+      text-decoration: none;
+    }
+
+    .navbar-links {
+      display: flex;
+      align-items: center;
+      margin-left: 2rem;
+    }
+
+    .nav-link {
+      color: var(--secondary-color);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .nav-link:hover {
+      color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+
+    .btn-logout {
+      background-color: #ef4444;
+      border: none;
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .btn-logout:hover {
+      background-color: #dc2626;
+      transform: translateY(-1px);
+    }
+
+    /* Content Section */
+    .content-section {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      padding: 2rem;
+    }
+    
+    /* Quick Stats Cards */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .stat-title {
+      font-size: 0.9rem;
+      color: var(--secondary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header text-center">
+      {% if request.user.profile_photo %}
+        <img src="{{ request.user.profile_photo.url }}" alt="Profile" class="rounded-circle profile-img">
+      {% else %}
+        <div class="profile-img rounded-circle bg-primary d-flex align-items-center justify-content-center">
+          <i class="fas fa-user fa-2x text-white"></i>
+        </div>
+      {% endif %}
+      <h5 class="user-name">{{ request.user.first_name }} {{ request.user.last_name }}</h5>
+      <p class="user-role">Employee</p>
+      <a href="{% url 'profile_view' %}" class="btn btn-sm btn-light mt-2">
+        <i class="fas fa-user-circle"></i> View Profile
+    </a>
+    
+    </div>
+    <ul class="nav flex-column">
+      <li><a href="{% url 'employee_dashboard' %}" class="nav-link {% if request.path == 'employee_dashboard' %}active{% endif %}">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a></li>
+      <li><a href="{% url 'leave_history' %}" class="nav-link {% if 'leave' in request.path %}active{% endif %}">
+        <i class="fas fa-calendar-alt"></i> Leave Management
+      </a></li>
+      <li><a href="{% url 'chat_room' room_name='general' %}" class="nav-link {% if 'chat' in request.path %}active{% endif %}">
+        <i class="fas fa-comments"></i> Chat Room
+      </a></li>
+      <li><a href="{% url 'submit_daily_update' %}" class="nav-link {% if 'daily_update' in request.path %}active{% endif %}">
+        <i class="fas fa-clipboard-list"></i> Daily Update
+      </a></li>
+      <li><a href="{% url 'employee_salary' %}" class="nav-link {% if 'salary' in request.path %}active{% endif %}">
+        <i class="fas fa-money-bill-wave"></i> Salary
+      </a></li>
+      <li><a href="{% url 'create_meet' %}" class="nav-link {% if 'meet' in request.path %}active{% endif %}">
+        <i class="fas fa-video"></i> Video Meeting
+      </a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <nav class="top-navbar">
+      <div class="navbar-left">
+        <a class="navbar-brand" href="{% url 'employee_dashboard' %}">
+          <i class="fas fa-home me-2"></i>Employee Portal
+        </a>
+        <div class="navbar-links">
+          <a class="nav-link" href="{% url 'employee_attendance' %}">
+            <i class="fas fa-clock me-1"></i> Attendance
+          </a>
+          <a class="nav-link" href="{% url 'employee_tasks' %}">
+            <i class="fas fa-tasks me-1"></i> Tasks
+          </a>
+        </div>
+      </div>
+      <a class="btn btn-logout" href="{% url 'logout' %}">
+        <i class="fas fa-sign-out-alt me-1"></i> Logout
+      </a>
+    </nav>
+    
+    <div class="content-section">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Add active class to current menu item
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.sidebar .nav-link');
+      
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && currentPath.includes(href.split('/').filter(Boolean).pop())) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{% extends "employee_base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<style>
+  /* Modern profile styling */
+  .profile-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-width: 1000px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+  }
+
+  .profile-header {
+    background: linear-gradient(135deg, #4158D0 0%, #C850C0 100%);
+    color: white;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+  }
+
+  .profile-header-info h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+  }
+
+  .profile-content {
+    padding: 0 40px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+  }
+
+  .detail-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+  }
+</style>
+
+<div class="profile-container">
+  <div class="profile-header">
+    <div>
+      <img src="{{ user.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
+    </div>
+    <div class="profile-header-info">
+      <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+      <p>{{ user.role.name }}</p>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <div class="detail-section">
+      <h2>Contact Details</h2>
+      <p><strong>Phone:</strong> {{ user.phone }}</p>
+      <p><strong>Email:</strong> {{ user.email_address }}</p>
+    </div>
+
+    <div class="detail-section">
+      <h2>Employee Information</h2>
+      <p><strong>Employee ID:</strong> {{ user.id }}</p>
+      <p><strong>Date of Joining:</strong> {{ user.hire_date }}</p>
+      <p><strong>Department:</strong> {{ user.dept.name }}</p>
+    </div>
+
+    <div class="detail-section">
+      <h2>Personal Details</h2>
+      <p><strong>Date of Birth:</strong> {{ user.date_of_birth }}</p>
+      <p><strong>Age:</strong> {{ user.age }}</p>
+      <p><strong>Gender:</strong> {{ user.gender }}</p>
+      <p><strong>Marital Status:</strong> {{ user.marital_status }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

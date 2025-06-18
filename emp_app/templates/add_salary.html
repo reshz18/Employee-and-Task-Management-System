@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .salary-form-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: linear-gradient(to bottom right, #ffffff, #f7f9fc);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .salary-form-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        font-size: 1.8rem;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.75rem;
+    }
+    
+    .salary-form-highlight {
+        color: #3498db;
+        font-weight: 700;
+    }
+    
+    .salary-form p {
+        margin-bottom: 1.25rem;
+    }
+    
+    .salary-form label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #34495e;
+    }
+    
+    .salary-form input, .salary-form select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .salary-form input:focus, .salary-form select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    .salary-form-button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 0.5rem;
+    }
+    
+    .salary-form-button:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .salary-form-button:active {
+        transform: translateY(0);
+    }
+    
+    .errorlist {
+        color: #e74c3c;
+        margin-top: 0.3rem;
+        font-size: 0.875rem;
+        list-style-type: none;
+        padding-left: 0;
+    }
+    
+    .helptext {
+        display: block;
+        color: #7f8c8d;
+        font-size: 0.875rem;
+        margin-top: 0.3rem;
+    }
+</style>
+
+<div class="salary-form-container">
+    <h2 class="salary-form-title">Assign Salary to <span class="salary-form-highlight">{{ employee.username }}</span></h2>
+    <form method="POST" class="salary-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="salary-form-button">Submit</button>
+    </form>
+</div>
+{% endblock %}

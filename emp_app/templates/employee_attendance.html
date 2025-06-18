@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#10B981",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center space-x-4">
+          <a href="{% url 'employee_dashboard' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 !rounded-button flex items-center space-x-2 transition-colors duration-200">
+            <i class="ri-arrow-left-line"></i>
+            <span>Back to Dashboard</span>
+          </a>
+          <h1 class="text-2xl font-semibold">Your Attendance</h1>
+        </div>
+        <form method="POST" class="flex items-center space-x-4">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="bg-primary text-white px-4 py-2 !rounded-button flex items-center space-x-2 whitespace-nowrap hover:bg-indigo-600 transition-colors duration-200"
+          >
+            <i class="ri-download-line"></i>
+            <span>Download Attendance</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Present and Absent Days Section -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Present Days</p>
+              <h2 id="presentDays" class="text-2xl font-semibold text-gray-900">{{ present_slots }}</h2>
+            </div>
+            <div
+              class="w-10 h-10 flex items-center justify-center bg-green-100 rounded-full"
+            >
+              <i class="ri-calendar-check-line text-green-600"></i>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Absent Days</p>
+              <h2 id="absentDays" class="text-2xl font-semibold text-gray-900">{{ absent_slots }}</h2>
+            </div>
+            <div
+              class="w-10 h-10 flex items-center justify-center bg-red-100 rounded-full"
+            >
+              <i class="ri-calendar-close-line text-red-600"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Percentage Donut Chart -->
+      <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Attendance Percentage</h3>
+        <div class="flex justify-center">
+          <canvas id="attendanceDonutChart" class="w-64 h-64"></canvas> <!-- Fixed size -->
+        </div>
+      </div>
+
+      <!-- Attendance Records Table -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">Attendance Records</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Date
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for record in attendance_records %}
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ record.date }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if record.status == 'Present' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}"
+                  >
+                    {{ record.status }}
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript for Donut Chart -->
+    <script>
+      // Initialize the chart
+      let attendanceDonutChart;
+
+      // Function to update the chart dynamically
+      function updateDonutChart(presentDays, absentDays) {
+        if (attendanceDonutChart) {
+          // Update the chart data
+          attendanceDonutChart.data.datasets[0].data = [presentDays, absentDays];
+          attendanceDonutChart.update(); // Update the chart without animations
+        } else {
+          // Create the chart if it doesn't exist
+          const ctx = document.getElementById('attendanceDonutChart').getContext('2d');
+          attendanceDonutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Present', 'Absent'],
+              datasets: [{
+                data: [presentDays, absentDays],
+                backgroundColor: ['#10B981', '#EF4444'], // Green for Present, Red for Absent
+                borderWidth: 0, // No border
+              }]
+            },
+            options: {
+              responsive: false, // Disable responsiveness
+              maintainAspectRatio: false, // Prevent resizing
+              cutout: '70%', // Donut hole size
+              plugins: {
+                legend: {
+                  display: false, // Hide legend
+                },
+                tooltip: {
+                  enabled: true, // Enable tooltips on hover
+                  callbacks: {
+                    label: function(context) {
+                      const label = context.label || '';
+                      const value = context.raw || 0;
+                      const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                      const percentage = ((value / total) * 100).toFixed(2) + '%';
+                      return `${label}: ${percentage}`;
+                    }
+                  }
+                },
+              },
+              animation: false, // Disable animations
+            }
+          });
+        }
+      }
+
+      // Initial chart render with backend data
+      updateDonutChart({{ present_slots }}, {{ absent_slots }});
+    </script>
+  </body>
+</html>

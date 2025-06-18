@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}Employee Updates Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Employee Updates Dashboard</h3>
+      <div>
+        <button class="btn btn-light btn-sm" id="refreshBtn">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+        <div class="dropdown d-inline-block ml-2">
+          <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-sort"></i> Sort
+          </button>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sortDropdown">
+            <a class="dropdown-item" href="#">Name (A-Z)</a>
+            <a class="dropdown-item" href="#">Name (Z-A)</a>
+            <a class="dropdown-item" href="#">Department</a>
+            <a class="dropdown-item" href="#">Recent Updates</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover" id="employeeTable">
+          <thead class="bg-light">
+            <tr>
+              <th>Employee</th>
+              <th>Department</th>
+              <th>Last Update</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for employee in employees %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="profile-photo mr-2">
+                    {% if employee.profile_photo %}
+                      <img src="{{ employee.profile_photo.url }}" alt="{{ employee.first_name }} {{ employee.last_name }}" class="profile-image">
+                    {% else %}
+                      <div class="avatar-circle mr-2 bg-primary text-white">
+                        {{ employee.first_name|first }}{{ employee.last_name|first }}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <span class="font-weight-medium">{{ employee.first_name }} {{ employee.last_name }}</span>
+                    {% if employee.position %}
+                    <div class="small text-muted">{{ employee.position }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if employee.department %}
+                {{ employee.department }}
+                {% else %}
+                <span class="text-muted">Not assigned</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if employee.last_update %}
+                <span>{{ employee.last_update|date:"M d, Y" }}</span>
+                {% else %}
+                <span class="text-muted">No updates yet</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="btn-group">
+                  <a href="{% url 'employee_daily_updates' employee.id %}" class="btn btn-view">
+                    <i class="fas fa-clipboard-list mr-1"></i> View Updates
+                  </a>
+                  <button type="button" class="btn btn-sm btn-edit" data-id="{{ employee.id }}">
+                    <i class="fas fa-user-edit"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer bg-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <span class="text-muted">Showing {{ employees|length }} employees</span>
+        </div>
+        <div>
+          <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+              </li>
+              <li class="page-item active"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick View Modal -->
+<div class="modal fade" id="employeeDetailsModal" tabindex="-1" role="dialog" aria-labelledby="employeeDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="employeeDetailsModalLabel">Employee Details</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="employeeDetailsContent">
+          <!-- Employee details will be loaded here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <a href="#" id="viewAllUpdatesBtn" class="btn btn-primary">View All Updates</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_css %}
+<style>
+  /* Base styles */
+  body {
+    background-color: #f8f9fa;
+  }
+  
+  .card {
+    border: none;
+    border-radius: 8px;
+  }
+  
+  .card-header {
+    border-radius: 8px 8px 0 0 !important;
+  }
+  
+  /* Profile photo styles */
+  .profile-photo {
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Avatar fallback styles */
+  .avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  /* Table styles */
+  .table th {
+    border-top: none;
+    font-weight: 600;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+  }
+  
+  .font-weight-medium {
+    font-weight: 500;
+  }
+  
+  /* Button styles */
+  .btn-view {
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .btn-view:hover {
+    background-color: #0b5ed7;
+    color: white;
+  }
+  
+  .btn-edit {
+    background-color: #0dcaf0;
+    color: #212529;
+    border: none;
+  }
+  
+  .btn-edit:hover {
+    background-color: #0bacce;
+    color: #212529;
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    // Edit button functionality
+    $('.btn-edit').click(function() {
+      const employeeId = $(this).data('id');
+      $('#employeeDetailsContent').html('<p>Loading employee details...</p>');
+      $('#employeeDetailsModal').modal('show');
+      $('#viewAllUpdatesBtn').attr('href', {% url 'employee_daily_updates' 0 %}.replace('0', employeeId));
+      
+      // Simulate loading data
+      setTimeout(function() {
+        const row = $('.btn-edit[data-id="' + employeeId + '"]').closest('tr');
+        const profileImage = row.find('.profile-image').attr('src');
+        const hasImage = row.find('.profile-image').length > 0;
+        
+        let avatarHtml = '';
+        if (hasImage) {
+          avatarHtml = <img src="${profileImage}" alt="Employee Photo" class="profile-image mb-2" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover;">;
+        } else {
+          avatarHtml = `<div class="avatar-circle mx-auto mb-2 bg-primary text-white" style="width: 64px; height: 64px; font-size: 24px;">
+            ${row.find('.avatar-circle').text()}
+          </div>`;
+        }
+        
+        $('#employeeDetailsContent').html(`
+          <div class="employee-info">
+            <div class="text-center mb-3">
+              ${avatarHtml}
+              <h5>${row.find('.font-weight-medium').text()}</h5>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col-6">
+                <p><strong>Department:</strong><br> ${row.find('td:nth-child(2)').text().trim() || 'Not assigned'}</p>
+              </div>
+              <div class="col-6">
+                <p><strong>Position:</strong><br> ${row.find('.small').text() || 'Not specified'}</p>
+              </div>
+            </div>
+            <p><strong>Last Update:</strong><br> ${row.find('td:nth-child(3) span').text() || 'No updates yet'}</p>
+            <p><strong>Email:</strong><br> employee${employeeId}@example.com</p>
+          </div>
+        `);
+      }, 500);
+    });
+    
+    // Refresh button functionality
+    $('#refreshBtn').click(function() {
+      location.reload();
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}
