@@ -115,17 +115,6 @@ python manage.py runserver
 * Use the dashboard to manage employees and tasks
 
 ---
-
-## 📸 Screenshots
-
-> Add screenshots or screen recordings of dashboard, task view, attendance graph, etc. here for better understanding.
-
-```
-📷 screenshots/dashboard.png  
-📷 screenshots/employee_list.png  
-📷 screenshots/chat_module.png  
-```
-
 ---
 
 ## 🤝 Contributing
